@@ -22,3 +22,4 @@ accounts-password
 twbs:bootstrap
 useraccounts:bootstrap
 lepozepo:s3
+pauldowman:dotenv
