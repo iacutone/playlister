@@ -1,0 +1,71 @@
+<head>
+  <title>Top 15 of 2015</title>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+    </header>
+
+    {{#if currentUser}}
+      {{#if playlistNotPresent}}
+        {{> playlistForm}}
+      {{/if}}
+
+      {{#if playlistPresent}}
+        {{> songsForm}}
+
+        <ul>
+          {{#each yourSongs}}
+            {{> song}}
+          {{/each}}
+        </ul>
+
+      {{/if}}
+    {{else}}
+      {{> atForm}}
+    {{/if}}
+  </div>
+</body>
+
+<template name="playlistForm">
+  <form class="new-playlist">
+    <input type="text" name="text" placeholder="Add a playlist name" />
+    <input type="submit" value="Submit">
+  </form>
+</template>
+
+<template name="songsForm">
+  <form class="new-song">
+    <input type="text" name="text" placeholder="Add an artist" />
+    <input type="text" name="text" placeholder="Add a song name" />
+    <input type="submit" value="Submit">
+  </form>
+</template>
+
+<template name="song">
+  <li>
+    {{artist}}
+    {{song}}
+  </li>
+<!--   <li class="{{#if checked}}checked{{/if}} {{#if private}}private{{/if}}">
+    <button class="delete">&times;</button>
+
+    <input type="checkbox" checked="{{checked}}" class="toggle-checked" />
+
+    {{#if isOwner}}
+      <button class="toggle-private">
+        {{#if private}}
+          Private
+        {{else}}
+          Public
+        {{/if}}
+      </button>
+    {{/if}}
+
+    <span class="text"><strong>{{username}}</strong> - {{text}}</span>
+  </li> -->
+</template>
+
+<template name="playlists">
+</template>
