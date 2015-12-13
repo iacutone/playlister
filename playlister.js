@@ -3,6 +3,16 @@ Songs = new Mongo.Collection("songs");
 
 if (Meteor.isClient) {
 
+  var key = process.env.AWSAccessKeyId;
+  var secret = process.env.AWSSecretKey;
+  var bucket = process.env.AWSBucket;
+
+  S3.config = {
+    key: key,
+    secret: secret,
+    bucket: bucket
+  };
+
   Meteor.subscribe("playlists");
   Meteor.subscribe("songs");
 
