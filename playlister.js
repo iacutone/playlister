@@ -1,7 +1,7 @@
 Playlists = new Mongo.Collection("playlists");
 Songs = new Mongo.Collection("songs");
 
-if (Meteor.isClient) {
+if (Meteor.isServer) {
 
   var key = process.env.AWSAccessKeyId;
   var secret = process.env.AWSSecretKey;
@@ -12,6 +12,38 @@ if (Meteor.isClient) {
     secret: secret,
     bucket: bucket
   };
+
+  // Load future from fibers
+  var Future = Npm.require("fibers/future");
+  // Load exec
+  var exec = Npm.require("child_process").exec;
+ 
+  // Server methods
+  Meteor.methods({
+    getSong: function (artist, song) {
+      // This method call won't return immediately, it will wait for the
+      // asynchronous code to finish, so we call unblock to allow this client
+      // to queue other method calls (see Meteor docs)
+      this.unblock();
+      var future = new Future();
+
+      exec("youtube-dl --default-search=ytsearch: " + artist + " " + song, function(error, stdout, stderr) {
+          // , '--restrict-filenames', '--format=bestaudio', '--audio-format=mp3'
+        // console.log(‘Command Method’, error, stdout, stderr);
+
+        if(error){
+          console.log(error);
+          // throw new Meteor.Error(500,command+" failed");
+        }
+ 
+        future.return({stdout: stdout, stderr: stderr});
+      }); 
+      return future.wait();
+    }
+  });
+}
+
+if (Meteor.isClient) {
 
   Meteor.subscribe("playlists");
   Meteor.subscribe("songs");
@@ -47,6 +79,10 @@ if (Meteor.isClient) {
         song: song,
         userId: Meteor.user()._id,
         createdAt: new Date()
+      });
+
+      Meteor.call('getSong', artist, song, function(error, response) {
+        console.log(response);
       });
 
       event.target.text[0].value = "";
@@ -140,3 +176,14 @@ if (Meteor.isClient) {
     },
   });
 }
+var options = []
+// function mp3 {
+//   # Download all of the things to /Downloads/audio/
+
+  // youtube-dl --default-search=ytsearch: \
+  //            --restrict-filenames \
+  //            --format=bestaudio \
+  //            --audio-format=mp3 \
+  //            --audio-quality=1 "$*" \
+  //            --output="Downloads/audio/%(title)s.%(ext)s"
+// }
