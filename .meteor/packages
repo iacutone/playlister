@@ -21,9 +21,7 @@ insecure                # Allow all DB writes from clients (for prototyping)
 accounts-password
 twbs:bootstrap
 useraccounts:bootstrap
-lepozepo:s3
 pauldowman:dotenv
 meteorhacks:npm
-
-
 npm-container
+peerlibrary:aws-sdk

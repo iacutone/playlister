@@ -21,23 +21,27 @@ if (Meteor.isServer) {
   // Server methods
   Meteor.methods({
     getSong: function (artist, song) {
+
+      S3.upload({
+        files: artist
+      });
       // This method call won't return immediately, it will wait for the
       // asynchronous code to finish, so we call unblock to allow this client
       // to queue other method calls (see Meteor docs)
       this.unblock();
       var future = new Future();
 
-      exec("youtube-dl --default-search=ytsearch: " + artist + " " + song, function(error, stdout, stderr) {
-          // , '--restrict-filenames', '--format=bestaudio', '--audio-format=mp3'
-        // console.log(‘Command Method’, error, stdout, stderr);
+      var options = ["--default-search=ytsearch:" + artist + " " + song, "--restrict-filenames", "--format=bestaudio", "--audio-format=mp3", "--audio-quality=1", "--output=Downloads/"]
+
+      exec("youtube-dl " + options, function(error, stdout, stderr) {
 
         if(error){
           console.log(error);
-          // throw new Meteor.Error(500,command+" failed");
         }
  
         future.return({stdout: stdout, stderr: stderr});
-      }); 
+      });
+
       return future.wait();
     }
   });
@@ -164,26 +168,15 @@ if (Meteor.isClient) {
     // Texts
     texts: {
       button: {
-          signUp: "Register Now!"
+        signUp: "Register Now!"
       },
       socialSignUp: "Register",
       socialIcons: {
-          "meteor-developer": "fa fa-rocket"
+        "meteor-developer": "fa fa-rocket"
       },
       title: {
-          forgotPwd: "Recover Your Password"
+        forgotPwd: "Recover Your Password"
       },
     },
   });
 }
-var options = []
-// function mp3 {
-//   # Download all of the things to /Downloads/audio/
-
-  // youtube-dl --default-search=ytsearch: \
-  //            --restrict-filenames \
-  //            --format=bestaudio \
-  //            --audio-format=mp3 \
-  //            --audio-quality=1 "$*" \
-  //            --output="Downloads/audio/%(title)s.%(ext)s"
-// }
