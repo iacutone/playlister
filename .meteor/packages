@@ -24,4 +24,4 @@ useraccounts:bootstrap
 pauldowman:dotenv
 meteorhacks:npm
 npm-container
-peerlibrary:aws-sdk
+cfs:s3
