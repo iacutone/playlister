@@ -1,10 +1,18 @@
 <head>
-  <title>Top 15 of 2015</title>
+  <title>Top Songs of 2015</title>
 </head>
 
 <body>
-  <div class="container">
+  <div class="container-fluid">
+    
     <header>
+      <nav class="navbar navbar-default">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <a class="navbar-brand" href="#">Top Songs of 2015</a>
+          </div>
+        </div>
+      </nav>
     </header>
 
     {{#if currentUser}}
@@ -14,6 +22,7 @@
 
       {{#if playlistPresent}}
         {{> songsForm}}
+        <br>
 
         <ol>
           {{#each yourSongs}}
@@ -29,25 +38,41 @@
 </body>
 
 <template name="playlistForm">
-  <form class="new-playlist">
-    <input type="text" name="text" placeholder="Add a playlist name" />
-    <input type="submit" value="Submit">
-  </form>
+  <div class="row">
+    <div class="col-md-8">
+      <form class="new-playlist form-inline">
+        <div class="form-group">
+          <input type="text" name="text" placeholder="Add a playlist name" class="form-control" />
+          <input type="submit" value="Submit" class="btn btn-primary">
+        </div>
+      </form>
+    </div>
+  </div>
 </template>
 
 <template name="songsForm">
-  <form class="new-song">
-    <input type="text" name="text" placeholder="Add an artist" />
-    <input type="text" name="text" placeholder="Add a song name" />
-    <input type="submit" value="Submit">
-  </form>
+  <div class="row">
+    <div class="col-md-8">
+      <form class="new-song form-inline">
+        <div class="form-group">
+          <input type="text" name="text" placeholder="Add an artist" class="form-control" />
+          <input type="text" name="text" placeholder="Add a song name" class="form-control" />
+          <input type="submit" value="Submit" class="btn btn-primary">
+        </div>
+      </form>
+    </div>
+  </div>
 </template>
 
 <template name="song">
-  <li>
-    {{artist}}
-    {{song}}
-  </li>
+  <div class="row">
+    <div class="col-md-8">
+      <li>
+        {{artist}}
+        {{song}}
+      </li>
+    </div>
+  </div>
 </template>
 
 <template name="playlists">
