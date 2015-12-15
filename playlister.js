@@ -3,43 +3,45 @@ Songs = new Mongo.Collection("songs");
 
 if (Meteor.isServer) {
 
-  var key = process.env.AWSAccessKeyId;
+  var key    = process.env.AWSAccessKeyId;
   var secret = process.env.AWSSecretKey;
   var bucket = process.env.AWSBucket;
 
-  S3.config = {
-    key: key,
-    secret: secret,
-    bucket: bucket
-  };
-
   // Load future from fibers
   var Future = Npm.require("fibers/future");
+
   // Load exec
   var exec = Npm.require("child_process").exec;
- 
+
   // Server methods
   Meteor.methods({
     getSong: function (artist, song) {
 
-      S3.upload({
-        files: artist
-      });
       // This method call won't return immediately, it will wait for the
       // asynchronous code to finish, so we call unblock to allow this client
       // to queue other method calls (see Meteor docs)
       this.unblock();
       var future = new Future();
+      
+      var searchString = `${artist + " " + song}`
 
-      var options = ["--default-search=ytsearch:" + artist + " " + song, "--restrict-filenames", "--format=bestaudio", "--audio-format=mp3", "--audio-quality=1", "--output=Downloads/"]
-
-      exec("youtube-dl " + options, function(error, stdout, stderr) {
-
+      var song = exec("/Users/iacutone/code/fun/playlister/youtube.sh " + searchString, function(error, stdout, stderr) {
+        console.log('stdout: ' + stdout);
+        console.log('stderr: ' + stderr);
         if(error){
-          console.log(error);
+          console.log('error: ' + error);
         }
  
         future.return({stdout: stdout, stderr: stderr});
+      });
+
+      new FS.Store.S3("song", {
+        accessKeyId: key, 
+        secretAccessKey: secret, 
+        bucket: bucket,
+        transformWrite: function(fileObj, readStream, writeStream) {
+          gm(readStream, fileObj.name()).stream().pipe(writeStream)
+        }
       });
 
       return future.wait();
@@ -85,8 +87,13 @@ if (Meteor.isClient) {
         createdAt: new Date()
       });
 
-      Meteor.call('getSong', artist, song, function(error, response) {
-        console.log(response);
+      Meteor.call("getSong", artist, song, function(error, response) {
+        if (error) {
+          console.log(error);
+        }
+
+        debugger
+        console.log(response)
       });
 
       event.target.text[0].value = "";
