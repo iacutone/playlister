@@ -3,6 +3,7 @@ Songs = new Mongo.Collection("songs");
 
 if (Meteor.isServer) {
   Sortable.collections = ['songs'];
+
   var key    = process.env.AWSAccessKeyId;
   var secret = process.env.AWSSecretKey;
   var bucket = process.env.AWSBucket;
@@ -25,7 +26,7 @@ if (Meteor.isServer) {
       
       var searchString = `${artist + " " + song}`
 
-      var song = exec("/Users/iacutone/code/fun/playlister/youtube.sh " + searchString, function(error, stdout, stderr) {
+      exec("/Users/iacutone/code/fun/playlister/youtube.sh " + searchString, function(error, stdout, stderr) {
         console.log('stdout: ' + stdout);
         console.log('stderr: ' + stderr);
         if(error){
@@ -35,15 +36,14 @@ if (Meteor.isServer) {
         future.return({stdout: stdout, stderr: stderr});
       });
 
-      debugger
-      new FS.Store.S3("song", {
-        accessKeyId: key, 
-        secretAccessKey: secret, 
-        bucket: bucket,
-        transformWrite: function(fileObj, readStream, writeStream) {
-          gm(readStream, fileObj.name()).stream().pipe(writeStream)
-        }
-      });
+      // new FS.Store.S3("song", {
+      //   accessKeyId: key, 
+      //   secretAccessKey: secret, 
+      //   bucket: bucket,
+      //   transformWrite: function(fileObj, readStream, writeStream) {
+      //     gm(readStream, fileObj.name()).stream().pipe(writeStream)
+      //   }
+      // });
 
       return future.wait();
     }
@@ -80,13 +80,15 @@ if (Meteor.isClient) {
       var artist = event.target.text[0].value;
       var song   = event.target.text[1].value;
       var userId = Meteor.user()._id;
+      var playlistId = Playlists.findOne({userId: userId})._id
 
       Songs.insert({
         artist: artist,
         song: song,
         userId: userId,
+        playlistId: playlistId,
         createdAt: new Date(),
-        order: Songs.find({userId: Meteor.user()._id}).fetch().length + 1
+        order: Songs.find({userId: userId}).fetch().length + 1
       });
 
       // Meteor.call("getSong", artist, song, userId, function(error, response) {
@@ -94,7 +96,6 @@ if (Meteor.isClient) {
       //     console.log(error);
       //   }
 
-      //   debugger
       //   console.log(response)
       // });
 
@@ -137,44 +138,22 @@ if (Meteor.isClient) {
 
   Template.songs.helpers({
     yourSongs: function () {
-    return Songs.find({}, { sort: { order: 1 } });
+      return Songs.find({userId: Meteor.user()._id}, { sort: { order: 1 } });
     },
-    typesOptions: {
+    songsOptions: {
       sortField: 'order',  // defaults to 'order' anyway
-      group: {
-        name: 'songs',
-        pull: 'clone',
-        put: false
-      },
-      sort: false  // don't allow reordering the types, just the attributes below
-    },
-
-    attributes: function () {
-      return Songs.find({}, {
-        sort: { order: 1 },
-        transform: function (doc) {
-          // doc.icon = Songs.findOne({name: doc.type}).icon;
-          return doc;
-        }
-      });
-    },
-    attributesOptions: {
       group: {
         name: 'songs',
         put: true
       },
-      // onAdd: function (event) {
-      //   delete event.data._id; // Generate a new id when inserting in the Attributes collection. Otherwise, if we add the same type twice, we'll get an error that the ids are not unique.
-      //   delete event.data.icon;
-      //   event.data.type = event.data.name;
-      //   event.data.name = 'Rename me (double click)'
-      // },
-      // event handler for reordering attributes
-      onSort: function (event) {
-        console.log('Item %s went from #%d to #%d',
-            event.data.name, event.oldIndex, event.newIndex
-        );
-      }
+      sort: true  // don't allow reordering the types, just the attributes below
+    },
+
+    // // event handler for reordering attributes
+    onSort: function (event) {
+      console.log('Item %s went from #%d to #%d',
+        event.data.name, event.oldIndex, event.newIndex
+      );
     }
   });
 
