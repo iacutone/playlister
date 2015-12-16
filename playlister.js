@@ -2,7 +2,7 @@ Playlists = new Mongo.Collection("playlists");
 Songs = new Mongo.Collection("songs");
 
 if (Meteor.isServer) {
-
+  Sortable.collections = ['songs'];
   var key    = process.env.AWSAccessKeyId;
   var secret = process.env.AWSSecretKey;
   var bucket = process.env.AWSBucket;
@@ -15,7 +15,7 @@ if (Meteor.isServer) {
 
   // Server methods
   Meteor.methods({
-    getSong: function (artist, song) {
+    getSong: function (artist, song, userId) {
 
       // This method call won't return immediately, it will wait for the
       // asynchronous code to finish, so we call unblock to allow this client
@@ -35,6 +35,7 @@ if (Meteor.isServer) {
         future.return({stdout: stdout, stderr: stderr});
       });
 
+      debugger
       new FS.Store.S3("song", {
         accessKeyId: key, 
         secretAccessKey: secret, 
@@ -50,7 +51,6 @@ if (Meteor.isServer) {
 }
 
 if (Meteor.isClient) {
-
   Meteor.subscribe("playlists");
   Meteor.subscribe("songs");
 
@@ -79,22 +79,24 @@ if (Meteor.isClient) {
 
       var artist = event.target.text[0].value;
       var song   = event.target.text[1].value;
+      var userId = Meteor.user()._id;
 
       Songs.insert({
         artist: artist,
         song: song,
-        userId: Meteor.user()._id,
-        createdAt: new Date()
+        userId: userId,
+        createdAt: new Date(),
+        order: Songs.find({userId: Meteor.user()._id}).fetch().length + 1
       });
 
-      Meteor.call("getSong", artist, song, function(error, response) {
-        if (error) {
-          console.log(error);
-        }
+      // Meteor.call("getSong", artist, song, userId, function(error, response) {
+      //   if (error) {
+      //     console.log(error);
+      //   }
 
-        debugger
-        console.log(response)
-      });
+      //   debugger
+      //   console.log(response)
+      // });
 
       event.target.text[0].value = "";
       event.target.text[1].value = "";
@@ -122,14 +124,57 @@ if (Meteor.isClient) {
       }
     },
 
+    playlistName: function () {
+      return Playlists.findOne({userId: Meteor.user()._id}).name
+    },
+
     songSize: function () {
       var songs = Songs.find({userId: Meteor.user()._id}).fetch();
 
       return songs.length;
+    }
+  });
+
+  Template.songs.helpers({
+    yourSongs: function () {
+    return Songs.find({}, { sort: { order: 1 } });
+    },
+    typesOptions: {
+      sortField: 'order',  // defaults to 'order' anyway
+      group: {
+        name: 'songs',
+        pull: 'clone',
+        put: false
+      },
+      sort: false  // don't allow reordering the types, just the attributes below
     },
 
-    yourSongs: function () {
-      return Songs.find({userId: Meteor.user()._id}).fetch();
+    attributes: function () {
+      return Songs.find({}, {
+        sort: { order: 1 },
+        transform: function (doc) {
+          // doc.icon = Songs.findOne({name: doc.type}).icon;
+          return doc;
+        }
+      });
+    },
+    attributesOptions: {
+      group: {
+        name: 'songs',
+        put: true
+      },
+      // onAdd: function (event) {
+      //   delete event.data._id; // Generate a new id when inserting in the Attributes collection. Otherwise, if we add the same type twice, we'll get an error that the ids are not unique.
+      //   delete event.data.icon;
+      //   event.data.type = event.data.name;
+      //   event.data.name = 'Rename me (double click)'
+      // },
+      // event handler for reordering attributes
+      onSort: function (event) {
+        console.log('Item %s went from #%d to #%d',
+            event.data.name, event.oldIndex, event.newIndex
+        );
+      }
     }
   });
 
@@ -145,7 +190,7 @@ if (Meteor.isClient) {
 
     // Appearance
     showAddRemoveServices: false,
-    showForgotPasswordLink: false,
+    showForgotPasswordLink: true,
     showLabels: true,
     showPlaceholders: true,
     showResendVerificationEmailLink: false,
@@ -159,8 +204,8 @@ if (Meteor.isClient) {
     showValidating: true,
 
     // Privacy Policy and Terms of Use
-    privacyUrl: 'privacy',
-    termsUrl: 'terms-of-use',
+    // privacyUrl: 'privacy',
+    // termsUrl: 'terms-of-use',
 
     // Redirects
     homeRoutePath: '/',

@@ -21,14 +21,12 @@
       {{/if}}
 
       {{#if playlistPresent}}
+        <h2>{{playlistName}}</h2>
+        
         {{> songsForm}}
         <br>
 
-        <ol>
-          {{#each yourSongs}}
-            {{> song}}
-          {{/each}}
-        </ol>
+        {{> songs}}
 
       {{/if}}
     {{else}}
@@ -64,13 +62,19 @@
   </div>
 </template>
 
-<template name="song">
+<template name="songs">
   <div class="row">
     <div class="col-md-8">
-      <li>
-        {{artist}}
-        {{song}}
-      </li>
+      <ol>
+        {{#sortable items=yourSongs options=songsOptions}}
+        
+          <li>
+            {{artist}}
+            {{song}}
+          </li>
+        
+        {{/sortable}}
+      </ol>
     </div>
   </div>
 </template>
