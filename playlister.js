@@ -16,7 +16,7 @@ if (Meteor.isServer) {
 
   // Server methods
   Meteor.methods({
-    getSong: function (artist, song, userId) {
+    getSong: function (userId, artist, song) {
 
       // This method call won't return immediately, it will wait for the
       // asynchronous code to finish, so we call unblock to allow this client
@@ -24,7 +24,7 @@ if (Meteor.isServer) {
       this.unblock();
       var future = new Future();
       
-      var searchString = `${artist + " " + song}`
+      var searchString = `${userId + " " + artist + " " + song}`
 
       exec("/Users/iacutone/code/fun/playlister/youtube.sh " + searchString, function(error, stdout, stderr) {
         console.log('stdout: ' + stdout);
@@ -36,14 +36,25 @@ if (Meteor.isServer) {
         future.return({stdout: stdout, stderr: stderr});
       });
 
-      // new FS.Store.S3("song", {
-      //   accessKeyId: key, 
-      //   secretAccessKey: secret, 
-      //   bucket: bucket,
-      //   transformWrite: function(fileObj, readStream, writeStream) {
-      //     gm(readStream, fileObj.name()).stream().pipe(writeStream)
-      //   }
-      // });
+      return future.wait();
+    },
+
+    postSongToS3: function (userId, directory, file) {
+
+      this.unblock();
+      var future = new Future();
+
+      var searchString = `${userId + " " + directory + " " + file}`
+
+      exec("/Users/iacutone/code/fun/playlister/s3.sh " + searchString, function(error, stdout, stderr) {
+        console.log('stdout: ' + stdout);
+        console.log('stderr: ' + stderr);
+        if(error){
+          console.log('error: ' + error);
+        }
+ 
+        future.return({stdout: stdout, stderr: stderr});
+      });
 
       return future.wait();
     }
@@ -88,16 +99,36 @@ if (Meteor.isClient) {
         userId: userId,
         playlistId: playlistId,
         createdAt: new Date(),
-        order: Songs.find({userId: userId}).fetch().length + 1
+        order: Songs.find({userId: userId}).fetch().length + 1,
+        file: '',
+        uploaded: false
       });
 
-      // Meteor.call("getSong", artist, song, userId, function(error, response) {
-      //   if (error) {
-      //     console.log(error);
-      //   }
+      Meteor.call("getSong", userId, artist, song, function(error, response) {
+        if (error) {
+          console.log(error);
+        }
 
-      //   console.log(response)
-      // });
+        console.log(response);
+        var string = response.stdout;
+        var userId = Meteor.user()._id;
+
+        var directory = string.match(/Users(.*)/)[0]
+        var file      = directory.split("/").slice(-1)[0]
+
+        songId = Songs.find({userId: userId}).fetch().pop()._id
+        Songs.update(songId, {$set: {file: file}});
+
+        Meteor.call("postSongToS3", userId, directory, file, function(error, response) {
+          if (error) {
+            console.log(error);
+          }
+
+          songId = Songs.find({userId: userId}).fetch().pop()._id
+          Songs.update(songId, {$set: {uploaded: true}});
+          console.log(response);
+        });
+      });
 
       event.target.text[0].value = "";
       event.target.text[1].value = "";
