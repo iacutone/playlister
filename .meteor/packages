@@ -24,7 +24,7 @@ useraccounts:bootstrap
 pauldowman:dotenv
 meteorhacks:npm
 npm-container
-cfs:s3
 rubaxa:sortable
 check
 fortawesome:fontawesome
+peerlibrary:aws-sdk
