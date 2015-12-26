@@ -1,1 +1,4 @@
-/* CSS declarations go here */
+footer {
+  position:absolute;
+  width: 100%;
+}
