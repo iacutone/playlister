@@ -4,10 +4,6 @@ Songs = new Mongo.Collection("songs");
 if (Meteor.isServer) {
   Sortable.collections = ['songs'];
 
-  var key    = process.env.AWSAccessKeyId;
-  var secret = process.env.AWSSecretKey;
-  var bucket = process.env.AWSBucket;
-
   // Load future from fibers
   var Future = Npm.require("fibers/future");
 
@@ -57,6 +53,33 @@ if (Meteor.isServer) {
       });
 
       return future.wait();
+    },
+
+    getSongs: function(userId) {
+      var list;
+      var key = process.env.AWSAccessKeyId;
+      var secret = process.env.AWSSecretKey;
+      var bucket = process.env.AWSBucket;
+
+      AWS.config.update({
+        accessKeyId: key,
+        secretAccessKey: secret
+      });
+
+      s3 = new AWS.S3();
+
+      list = s3.listObjectsSync({
+        Bucket: bucket,
+        Prefix: userId
+      });
+
+      ref = list.Contents;
+      for (i = 0, len = ref.length; i < len; i++) {
+        file = ref[i];
+        var params = {Bucket: bucket, Key: file['Key']};
+        var url = s3.getSignedUrl('getObject', params);
+        return url;
+      }
     }
   });
 }
@@ -64,6 +87,7 @@ if (Meteor.isServer) {
 if (Meteor.isClient) {
   Meteor.subscribe("playlists");
   Meteor.subscribe("songs");
+  Meteor.subscribe("users");
 
   Template.body.events({
 
@@ -80,6 +104,10 @@ if (Meteor.isClient) {
         userId: Meteor.user()._id,
         createdAt: new Date() // current time
       });
+
+      var userId     = Meteor.user()._id;
+      var playlistId = Playlists.findOne({userId: userId})._id
+      Session.set('playlistId', playlistId);
  
       // Clear form
       event.target.text.value = "";
@@ -132,6 +160,46 @@ if (Meteor.isClient) {
 
       event.target.text[0].value = "";
       event.target.text[1].value = "";
+    },
+
+    "submit .play-song": function(event){
+      event.preventDefault();
+
+      var userId = Meteor.user()._id;
+      var songId = event.target.text.value
+      var song = Songs.findOne({_id: songId})
+
+      Session.set('songSong', song.song);
+      Session.set('songArtist', song.artist);
+      Session.set('songId', song._id);
+
+      Meteor.call("getSongs", userId, function(error, response) {
+        var audioElement = document.getElementById(song.id);
+        audioElement.setAttribute('src', response);
+        audioElement.play();
+      });
+    },
+
+    "submit .pause-song": function(event){
+      event.preventDefault();
+      var userId = Meteor.user()._id;
+      var songId = Session.get('songId');
+      
+      var audioElement = document.getElementById(song.id);
+      audioElement.pause();
+    },
+
+    "submit .stop-song": function(event){
+      event.preventDefault();
+      var userId = Meteor.user()._id;
+      var songId = Session.get('songId');
+
+      var audioElement = document.getElementById(song.id);
+      audioElement.pause();
+
+      Session.set('songSong', "");
+      Session.set('songArtist', "");
+      Session.set('_id', "");
     }
   });
 
@@ -146,30 +214,24 @@ if (Meteor.isClient) {
       }
     },
 
-    playlistPresent: function () {
-      var playlists = Playlists.find({userId: Meteor.user()._id}).fetch();
-      
-      if(playlists.length > 0) {
+    yourPlaylist: function () {
+      debugger
+      var playlistId = Session.get('playlistId');
+      var userPlaylistId = Playlists.findOne({userId: Meteor.user()._id})._id
+
+      if(playlistId == userPlaylistId) {
         return true;
       } else {
         return false;
       }
-    },
-
-    playlistName: function () {
-      return Playlists.findOne({userId: Meteor.user()._id}).name
-    },
-
-    songSize: function () {
-      var songs = Songs.find({userId: Meteor.user()._id}).fetch();
-
-      return songs.length;
     }
   });
 
-  Template.songs.helpers({
-    yourSongs: function () {
-      return Songs.find({userId: Meteor.user()._id}, { sort: { order: 1 } });
+  Template.playlist.helpers({
+    songs: function () {
+      var playlistId = Session.get('playlistId')
+
+      return Songs.find({playlistId: playlistId}, { sort: { order: 1 } });
     },
     songsOptions: {
       sortField: 'order',  // defaults to 'order' anyway
@@ -180,11 +242,48 @@ if (Meteor.isClient) {
       sort: true  // don't allow reordering the types, just the attributes below
     },
 
-    // // event handler for reordering attributes
+    // event handler for reordering attributes
     onSort: function (event) {
       console.log('Item %s went from #%d to #%d',
         event.data.name, event.oldIndex, event.newIndex
       );
+    },
+
+    playlistName: function () {
+      var playlistId = Session.get('playlistId')
+
+      return Playlists.findOne({playlistId: playlistId}).name
+    }
+  });
+
+  Template.playlists.helpers({
+    playlists: function () {
+      return Playlists.find({})
+    },
+
+    userEmail: function () {
+      return Meteor.user().emails[0].address
+    }
+  });
+
+  Template.playlists.events({
+    "click .playlist": function (event) {
+
+      var playlist = $(this)[0]
+      Session.set('playlist', playlist._id);
+    }
+  });
+
+  Template.sessionPlayer.helpers({
+    formattedSong: function () {
+      var name = Session.get('songSong');
+      var artist = Session.get('songArtist');
+
+      if (name == undefined || name == '') {
+        return ''
+      } else {
+        return `Playing ${name} by ${artist}`
+      }
     }
   });
 
