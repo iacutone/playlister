@@ -25,7 +25,7 @@ if (Meteor.isServer) {
       exec("/Users/iacutone/code/fun/playlister/youtube.sh " + searchString, function(error, stdout, stderr) {
         console.log('stdout: ' + stdout);
         console.log('stderr: ' + stderr);
-        if(error){
+        if (error) {
           console.log('error: ' + error);
         }
  
@@ -45,7 +45,7 @@ if (Meteor.isServer) {
       exec("/Users/iacutone/code/fun/playlister/s3.sh " + searchString, function(error, stdout, stderr) {
         console.log('stdout: ' + stdout);
         console.log('stderr: ' + stderr);
-        if(error){
+        if (error) {
           console.log('error: ' + error);
         }
  
@@ -134,28 +134,39 @@ if (Meteor.isClient) {
 
       Meteor.call("getSong", userId, artist, song, function(error, response) {
         if (error) {
-          console.log(error);
+          console.log("error" + error);
         }
 
         console.log(response);
-        var string = response.stdout;
-        var userId = Meteor.user()._id;
+        
+        var responseError = response.stderr.match(/ERROR/);
 
-        var directory = string.match(/Users(.*)/)[0]
-        var file      = directory.split("/").slice(-1)[0]
+        if (responseError.length > 0) {
+          var userId = Meteor.user()._id;
+          var songId = Songs.find({userId: userId}).fetch().pop()._id
+          Songs.remove(songId);
 
-        songId = Songs.find({userId: userId}).fetch().pop()._id
-        Songs.update(songId, {$set: {file: file}});
+          FlashMessages.sendError("Song not found.");
+        } else {
+          var string = response.stdout;
+          var userId = Meteor.user()._id;
 
-        Meteor.call("postSongToS3", userId, directory, file, function(error, response) {
-          if (error) {
-            console.log(error);
-          }
+          var directory = string.match(/Users(.*)/)[0]
+          var file      = directory.split("/").slice(-1)[0]
 
           songId = Songs.find({userId: userId}).fetch().pop()._id
-          Songs.update(songId, {$set: {uploaded: true}});
-          console.log(response);
-        });
+          Songs.update(songId, {$set: {file: file}});
+
+          Meteor.call("postSongToS3", userId, directory, file, function(error, response) {
+            if (error) {
+              console.log(error);
+            }
+
+            songId = Songs.find({userId: userId}).fetch().pop()._id
+            Songs.update(songId, {$set: {uploaded: true}});
+            console.log(response);
+          });
+        }
       });
 
       event.target.text[0].value = "";
@@ -207,7 +218,7 @@ if (Meteor.isClient) {
     playlistNotPresent: function () {
       var playlists = Playlists.find({userId: Meteor.user()._id}).fetch();
 
-      if(playlists.length == 0) {
+      if (playlists.length == 0) {
         return true;
       } else {
         return false;
@@ -215,11 +226,10 @@ if (Meteor.isClient) {
     },
 
     yourPlaylist: function () {
-      debugger
       var playlistId = Session.get('playlistId');
       var userPlaylistId = Playlists.findOne({userId: Meteor.user()._id})._id
 
-      if(playlistId == userPlaylistId) {
+      if (playlistId == userPlaylistId || playlistId == undefined) {
         return true;
       } else {
         return false;
@@ -229,9 +239,15 @@ if (Meteor.isClient) {
 
   Template.playlist.helpers({
     songs: function () {
-      var playlistId = Session.get('playlistId')
 
-      return Songs.find({playlistId: playlistId}, { sort: { order: 1 } });
+      var playlistId = Session.get('playlistId');
+
+      if (playlistId == undefined) {
+        var userPlaylistId = Playlists.findOne({userId: Meteor.user()._id})._id
+        return Songs.find({playlistId: userPlaylistId}, { sort: { order: 1 } });
+      } else {
+        return Songs.find({playlistId: playlistId}, { sort: { order: 1 } });
+      }
     },
     songsOptions: {
       sortField: 'order',  // defaults to 'order' anyway
