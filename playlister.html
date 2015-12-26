@@ -3,36 +3,42 @@
 </head>
 
 <body>
-  <div class="container-fluid">
-    
-    <header>
-      <nav class="navbar navbar-default">
-        <div class="container-fluid">
-          <div class="navbar-header">
-            <a class="navbar-brand" href="#">Top Songs of 2015</a>
-          </div>
+  <header>
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">Top Songs of 2015</a>
         </div>
-      </nav>
-    </header>
+      </div>
+    </nav>
+  </header>
 
+  <div class="container-fluid">
     {{#if currentUser}}
       {{#if playlistNotPresent}}
         {{> playlistForm}}
-      {{/if}}
+      {{else}}
+        {{#if yourPlaylist}}
+          {{> songsForm}}
+        {{/if}}
 
-      {{#if playlistPresent}}
-        <h2>{{playlistName}}</h2>
-        
-        {{> songsForm}}
-        <br>
-
-        {{> songs}}
-
+        {{> playlist}}
+        {{> playlists}}
       {{/if}}
     {{else}}
       {{> atForm}}
     {{/if}}
   </div>
+
+  <footer>
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <div id="navbar" class="collapse navbar-collapse">
+          {{> sessionPlayer}}
+        </div>
+      </div>
+    </nav>
+  </footer>
 </body>
 
 <template name="playlistForm">
@@ -46,6 +52,8 @@
       </form>
     </div>
   </div>
+
+  <br>
 </template>
 
 <template name="songsForm">
@@ -60,24 +68,71 @@
       </form>
     </div>
   </div>
+
+  <br>
 </template>
 
-<template name="songs">
+<template name="playlist">
   <div class="row">
     <div class="col-md-8">
-      <ol>
-        {{#sortable items=yourSongs options=songsOptions sortField="order"}}
-        
-          <li>
-            {{artist}}
-            {{song}}
-          </li>
-        
-        {{/sortable}}
-      </ol>
+      <div class="panel panel-default">
+        <div class="panel-heading">Playlist: {{playlistName}}</div>
+        <ul class="list-group">
+          {{#sortable items=songs options=songsOptions sortField="order"}}
+            
+            <form class="play-song">
+              <li class="list-group-item">
+                <input type="hidden" name="text" value={{_id}} />
+                {{#if uploaded}}
+                  <button type="submit" class='btn btn-primary'>
+                    <i class="fa fa-play"></i>
+                  </button>
+                {{/if}}
+
+                {{artist}}:
+                {{song}}
+                <audio id={{_id}}></audio>
+              </li>
+            </form>
+          
+          {{/sortable}}
+        </ul>
+      </div>
     </div>
   </div>
 </template>
 
 <template name="playlists">
+  <div class="row">
+    <div class="col-md-8">
+      <div class="panel panel-default">
+        <div class="panel-heading">Playlists</div>
+        {{#each playlists}}
+          <ul class="list-group">
+            <li class="list-group-item">
+              <a href="#" class="playlist">{{name}} by {{userEmail}}</a>
+            </li>
+          </ul>
+        {{/each}}
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="sessionPlayer">
+  <form class="navbar-form navbar-left pause-song">
+    <button type="submit" class='btn btn-primary btn-blocks'>
+      <i class="fa fa-pause"></i>
+    </button>
+  </form>
+
+  <form class="navbar-form navbar-left stop-song" role="search">
+    <button type="submit" class='btn btn-primary form-inline'>
+      <i class="fa fa-stop"></i>
+    </button>
+  </form>
+
+  <p class="navbar-text navbar-left">
+    {{formattedSong}}
+  </p>
 </template>
