@@ -41,7 +41,7 @@ if (Meteor.isServer) {
       var future = new Future();
 
       var searchString = `${userId + " " + directory + " " + file}`
-
+      console.log('posting')
       exec("/Users/iacutone/code/fun/playlister/s3.sh " + searchString, function(error, stdout, stderr) {
         console.log('stdout: ' + stdout);
         console.log('stderr: ' + stderr);
@@ -138,13 +138,17 @@ if (Meteor.isClient) {
         }
 
         console.log(response);
-        
-        var responseError = response.stderr.match(/ERROR/);
 
+        if(response.stderr == "") {
+          var responseError = '';
+        } else {
+          var responseError = response.stderr.match(/ERROR/);
+        }
+        
         if (responseError.length > 0) {
           var userId = Meteor.user()._id;
-          var songId = Songs.find({userId: userId}).fetch().pop()._id
-          Songs.remove(songId);
+          // var songId = Songs.find({userId: userId}).fetch().pop()._id
+          // Songs.remove(songId);
 
           FlashMessages.sendError("Song not found.");
         } else {
@@ -156,7 +160,7 @@ if (Meteor.isClient) {
 
           songId = Songs.find({userId: userId}).fetch().pop()._id
           Songs.update(songId, {$set: {file: file}});
-
+          console.log('post to s3 client')
           Meteor.call("postSongToS3", userId, directory, file, function(error, response) {
             if (error) {
               console.log(error);
@@ -177,15 +181,17 @@ if (Meteor.isClient) {
       event.preventDefault();
 
       var userId = Meteor.user()._id;
+      var playlistId = Playlists.findOne({userId: userId})._id
       var songId = event.target.text.value
       var song = Songs.findOne({_id: songId})
 
       Session.set('songSong', song.song);
+      Session.set('playlistId', playlistId);
       Session.set('songArtist', song.artist);
       Session.set('songId', song._id);
 
       Meteor.call("getSongs", userId, function(error, response) {
-        var audioElement = document.getElementById(song.id);
+        var audioElement = document.getElementById(song._id);
         audioElement.setAttribute('src', response);
         audioElement.play();
       });
@@ -266,9 +272,13 @@ if (Meteor.isClient) {
     },
 
     playlistName: function () {
-      var playlistId = Session.get('playlistId')
-
-      return Playlists.findOne({playlistId: playlistId}).name
+      var playlistId = Session.get('playlistId');
+      debugger
+      if(playlistId !== undefined) {
+        return Playlists.findOne({playlistId: playlistId}).name
+      } else {
+        return ""
+      }
     }
   });
 
