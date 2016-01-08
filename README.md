@@ -13,3 +13,6 @@ export S3KEY
 export S3SECRET
 
 export BUCKET
+
+chmod +x s3.sh
+chmod +x youtube.sh
