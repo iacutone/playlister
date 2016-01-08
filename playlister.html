@@ -83,9 +83,9 @@
         <div class="panel-heading">Playlist: {{playlistName}}</div>
         <ul class="list-group">
           {{#sortable items=songs options=songsOptions sortField="order"}}
-            
-            <form class="play-song">
-              <li class="list-group-item">
+            <li class="list-group-item">
+              <form class="play-song">
+              
                 <input type="hidden" name="text" value={{_id}} />
                 {{#if uploaded}}
                   <button type="submit" class='btn btn-primary'>
@@ -96,9 +96,9 @@
                 {{artist}}:
                 {{song}}
                 <audio id={{_id}}></audio>
-              </li>
-            </form>
-          
+              
+              </form>
+            </li>
           {{/sortable}}
         </ul>
       </div>
@@ -114,7 +114,10 @@
         {{#each playlists}}
           <ul class="list-group">
             <li class="list-group-item">
-              <a href="#" class="playlist">{{name}} by {{userEmail}}</a>
+              <form class="playlist">
+                <input type="hidden" name="text" value={{_id}} />
+                <a href="#" class="playlist">{{name}} by {{userEmail}}</a>
+              </form>
             </li>
           </ul>
         {{/each}}
@@ -127,12 +130,6 @@
   <form class="navbar-form navbar-left pause-song">
     <button type="submit" class='btn btn-primary btn-blocks'>
       <i class="fa fa-pause"></i>
-    </button>
-  </form>
-
-  <form class="navbar-form navbar-left stop-song" role="search">
-    <button type="submit" class='btn btn-primary form-inline'>
-      <i class="fa fa-stop"></i>
     </button>
   </form>
 

@@ -41,7 +41,7 @@ if (Meteor.isServer) {
       var future = new Future();
 
       var searchString = `${userId + " " + directory + " " + file}`
-      console.log('posting')
+
       exec("/Users/iacutone/code/fun/playlister/s3.sh " + searchString, function(error, stdout, stderr) {
         console.log('stdout: ' + stdout);
         console.log('stderr: ' + stderr);
@@ -102,6 +102,7 @@ if (Meteor.isClient) {
       Playlists.insert({
         name: playlistName,
         userId: Meteor.user()._id,
+        userEmail: Meteor.user().emails[0].address,
         createdAt: new Date() // current time
       });
 
@@ -160,7 +161,7 @@ if (Meteor.isClient) {
 
           songId = Songs.find({userId: userId}).fetch().pop()._id
           Songs.update(songId, {$set: {file: file}});
-          console.log('post to s3 client')
+
           Meteor.call("postSongToS3", userId, directory, file, function(error, response) {
             if (error) {
               console.log(error);
@@ -180,13 +181,12 @@ if (Meteor.isClient) {
     "submit .play-song": function(event){
       event.preventDefault();
 
-      var userId = Meteor.user()._id;
-      var playlistId = Playlists.findOne({userId: userId})._id
       var songId = event.target.text.value
-      var song = Songs.findOne({_id: songId})
+      var song = Songs.findOne({_id: songId});
+      var userId = song.userId
 
-      Session.set('songSong', song.song);
-      Session.set('playlistId', playlistId);
+      Session.set('song', song.song);
+      Session.set('playlistId', song.playlistId);
       Session.set('songArtist', song.artist);
       Session.set('songId', song._id);
 
@@ -199,24 +199,18 @@ if (Meteor.isClient) {
 
     "submit .pause-song": function(event){
       event.preventDefault();
-      var userId = Meteor.user()._id;
+
       var songId = Session.get('songId');
-      
-      var audioElement = document.getElementById(song.id);
+      var song = Songs.findOne({_id: songId})
+
+      var audioElement = document.getElementById(song._id);
       audioElement.pause();
     },
 
-    "submit .stop-song": function(event){
+    "click .playlist":  function (event) {
       event.preventDefault();
-      var userId = Meteor.user()._id;
-      var songId = Session.get('songId');
 
-      var audioElement = document.getElementById(song.id);
-      audioElement.pause();
-
-      Session.set('songSong', "");
-      Session.set('songArtist', "");
-      Session.set('_id', "");
+      Session.set('playlistId', this._id);
     }
   });
 
@@ -273,9 +267,9 @@ if (Meteor.isClient) {
 
     playlistName: function () {
       var playlistId = Session.get('playlistId');
-      debugger
-      if(playlistId !== undefined) {
-        return Playlists.findOne({playlistId: playlistId}).name
+
+      if (playlistId !== undefined) {
+        return Playlists.findOne({_id: playlistId}).name
       } else {
         return ""
       }
@@ -285,10 +279,6 @@ if (Meteor.isClient) {
   Template.playlists.helpers({
     playlists: function () {
       return Playlists.find({})
-    },
-
-    userEmail: function () {
-      return Meteor.user().emails[0].address
     }
   });
 
@@ -302,7 +292,7 @@ if (Meteor.isClient) {
 
   Template.sessionPlayer.helpers({
     formattedSong: function () {
-      var name = Session.get('songSong');
+      var name = Session.get('song');
       var artist = Session.get('songArtist');
 
       if (name == undefined || name == '') {
