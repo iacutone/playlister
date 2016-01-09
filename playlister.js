@@ -140,16 +140,16 @@ if (Meteor.isClient) {
 
         console.log(response);
 
-        if(response.stderr == "") {
+        if (response.stderr == "") {
           var responseError = '';
-        } else {
+        } else if (responseError = response.stderr.match(/ERROR/) !== null) {
           var responseError = response.stderr.match(/ERROR/);
+        } else {
+          var responseError = '';
         }
         
         if (responseError.length > 0) {
           var userId = Meteor.user()._id;
-          // var songId = Songs.find({userId: userId}).fetch().pop()._id
-          // Songs.remove(songId);
 
           FlashMessages.sendError("Song not found.");
         } else {
