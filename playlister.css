@@ -1,4 +1,59 @@
+.navbar-default {
+  background: white;
+}
+
+.new-song {
+  padding: 20px;
+}
+
+.panel-primary {
+  border-color: #CB9000;
+}
+
+.panel-heading {
+  background: #00257F !important;
+  color: white !important;
+  border-color: #CB9000;
+}
+
+.list-group-item {
+  border: 1px solid #CB9000;
+}
+
+.btn-primary {
+  background: #144ACB;
+}
+
+.btn-primary:hover {
+  background: #00257F;
+}
+
+.btn-circle {
+  background: #144ACB;
+  color: white;
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 20px;
+}
+
+.btn-circle:hover {
+  background: #00257F;
+  color: white;
+  width: 40px;
+  height: 40px;
+  line-height: inherit;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.fa-play {
+  padding-left: 5px;
+}
+
 footer {
-  position:absolute;
+  position: absolute;
   width: 100%;
 }

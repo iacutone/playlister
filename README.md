@@ -16,3 +16,5 @@ export BUCKET
 
 chmod +x s3.sh
 chmod +x youtube.sh
+
+Main color on Kuler #00257F
