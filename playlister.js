@@ -181,36 +181,66 @@ if (Meteor.isClient) {
     "submit .play-song": function(event){
       event.preventDefault();
 
-      var songId = event.target.text.value
-      var song = Songs.findOne({_id: songId});
-      var userId = song.userId
+      Session.set('playOrPauseClass', "fa fa-pause");
+      var sessionSongId = Session.get('songId');
 
-      Session.set('song', song.song);
-      Session.set('playlistId', song.playlistId);
-      Session.set('songArtist', song.artist);
-      Session.set('songId', song._id);
+      if (event.target.text !== undefined) {
+        var songId = event.target.text.value;
+        var song = Songs.findOne({_id: songId});
+        var userId = song.userId;
 
-      Meteor.call("getSongs", userId, function(error, response) {
-        var audioElement = document.getElementById(song._id);
-        audioElement.setAttribute('src', response);
+        if (songId == sessionSongId) {
+          var audioElement = document.getElementById(sessionSongId);
+          audioElement.play();
+
+          event.target.classList.remove("play-song");
+          event.target.classList.add("pause-song");
+        } else {
+          Session.set('song', song.song);
+          Session.set('playlistId', song.playlistId);
+          Session.set('songArtist', song.artist);
+          Session.set('songId', song._id);
+
+          Meteor.call("getSongs", userId, function(error, response) {
+            var audioElement = document.getElementById(song._id);
+            audioElement.setAttribute('src', response);
+            audioElement.play();
+          });
+
+          event.target.classList.remove("play-song");
+          event.target.classList.add("pause-song");
+        }
+
+      } else {
+
+        var audioElement = document.getElementById(sessionSongId);
         audioElement.play();
-      });
+
+        event.target.classList.remove("play-song");
+        event.target.classList.add("pause-song");
+      }
     },
 
     "submit .pause-song": function(event){
       event.preventDefault();
+
+      Session.set('playOrPauseClass', "fa fa-play");
 
       var songId = Session.get('songId');
       var song = Songs.findOne({_id: songId})
 
       var audioElement = document.getElementById(song._id);
       audioElement.pause();
+
+      event.target.classList.remove("pause-song");
+      event.target.classList.add("play-song");
     },
 
     "click .playlist":  function (event) {
       event.preventDefault();
 
       Session.set('playlistId', this._id);
+      Session.set('playOrPauseClass', "fa fa-play");
     }
   });
 
@@ -239,7 +269,6 @@ if (Meteor.isClient) {
 
   Template.playlist.helpers({
     songs: function () {
-
       var playlistId = Session.get('playlistId');
 
       if (playlistId == undefined) {
@@ -273,6 +302,16 @@ if (Meteor.isClient) {
       } else {
         return ""
       }
+    },
+
+    playOrPauseClass: function () {
+      var playOrPause = Session.get('playOrPauseClass');
+
+      if (playOrPause == undefined) {
+        return 'fa fa-play'
+      } else {
+        return playOrPause;
+      }
     }
   });
 
@@ -299,6 +338,16 @@ if (Meteor.isClient) {
         return ''
       } else {
         return `Playing ${name} by ${artist}`
+      }
+    },
+
+    playOrPauseClass: function () {
+      var playOrPause = Session.get('playOrPauseClass');
+
+      if (playOrPause == undefined) {
+        return 'fa fa-play'
+      } else {
+        return playOrPause;
       }
     }
   });

@@ -28,7 +28,7 @@
         {{> playlists}}
       {{/if}}
     {{else}}
-      <div class="col-md-6 cold-md-offset-3">
+      <div class="col-md-6 col-md-offset-3">
         {{> atForm}}
       </div>
     {{/if}}
@@ -47,7 +47,7 @@
 
 <template name="playlistForm">
   <div class="row">
-    <div class="col-md-8">
+    <div class="col-md-6 col-md-offset-3">
       <form class="new-playlist form-inline">
         <div class="form-group">
           <input type="text" name="text" placeholder="Add a playlist name" class="form-control" />
@@ -62,23 +62,24 @@
 
 <template name="songsForm">
   <div class="row">
-    <div class="col-md-8">
-      <form class="new-song form-inline">
-        <div class="form-group">
-          <input type="text" name="text" placeholder="Add an artist" class="form-control" />
-          <input type="text" name="text" placeholder="Add a song name" class="form-control" />
-          <input type="submit" value="Submit" class="btn btn-primary">
-        </div>
-      </form>
+    <div class="col-md-6 col-md-offset-3">
+      <div class="panel panel-primary">
+        <div class="panel-heading">New Song</div>
+        <form class="new-song form-inline">
+          <div class="form-group">
+            <input type="text" name="text" placeholder="Add an artist" class="form-control" />
+            <input type="text" name="text" placeholder="Add a song name" class="form-control" />
+            <input type="submit" value="Submit" class="btn btn-primary">
+          </div>
+        </form>
+      </div>
     </div>
   </div>
-
-  <br>
 </template>
 
 <template name="playlist">
   <div class="row">
-    <div class="col-md-8">
+    <div class="col-md-6 col-md-offset-3">
       <div class="panel panel-primary">
         <div class="panel-heading">Playlist: {{playlistName}}</div>
         <ul class="list-group">
@@ -88,8 +89,8 @@
               
                 <input type="hidden" name="text" value={{_id}} />
                 {{#if uploaded}}
-                  <button type="submit" class='btn btn-primary'>
-                    <i class="fa fa-play"></i>
+                  <button type="submit" class='btn btn-circle'>
+                    <i class={{playOrPauseClass}}></i>
                   </button>
                 {{/if}}
 
@@ -108,7 +109,7 @@
 
 <template name="playlists">
   <div class="row">
-    <div class="col-md-8">
+    <div class="col-md-6 col-md-offset-3">
       <div class="panel panel-primary">
         <div class="panel-heading">Playlists</div>
         {{#each playlists}}
@@ -128,8 +129,8 @@
 
 <template name="sessionPlayer">
   <form class="navbar-form navbar-left pause-song">
-    <button type="submit" class='btn btn-primary btn-blocks'>
-      <i class="fa fa-pause"></i>
+    <button type="submit" class='btn btn-circle btn-blocks'>
+      <i class={{playOrPauseClass}}></i>
     </button>
   </form>
 
