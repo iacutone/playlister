@@ -12,7 +12,7 @@ if (Meteor.isServer) {
 
   // Server methods
   Meteor.methods({
-    getSong: function (userId, artist, song) {
+    postSong: function (userId, artist, song) {
 
       // This method call won't return immediately, it will wait for the
       // asynchronous code to finish, so we call unblock to allow this client
@@ -55,7 +55,7 @@ if (Meteor.isServer) {
       return future.wait();
     },
 
-    getSongs: function(userId) {
+    getSong: function(userId, file) {
       var list;
       var key = process.env.AWSAccessKeyId;
       var secret = process.env.AWSSecretKey;
@@ -68,9 +68,11 @@ if (Meteor.isServer) {
 
       s3 = new AWS.S3();
 
+      var file = `${userId + "/" + file}`
+
       list = s3.listObjectsSync({
         Bucket: bucket,
-        Prefix: userId
+        Prefix: file
       });
 
       ref = list.Contents;
@@ -133,7 +135,7 @@ if (Meteor.isClient) {
         uploaded: false
       });
 
-      Meteor.call("getSong", userId, artist, song, function(error, response) {
+      Meteor.call("postSong", userId, artist, song, function(error, response) {
         if (error) {
           console.log("error" + error);
         }
@@ -194,21 +196,28 @@ if (Meteor.isClient) {
           audioElement.play();
 
           event.target.classList.remove("play-song");
+          event.target.children[1].children[0].classList.remove("fa-play");
           event.target.classList.add("pause-song");
+          event.target.children[1].children[0].classList.add("fa-pause");
         } else {
+
           Session.set('song', song.song);
           Session.set('playlistId', song.playlistId);
           Session.set('songArtist', song.artist);
           Session.set('songId', song._id);
 
-          Meteor.call("getSongs", userId, function(error, response) {
+          var fileName = song.file;
+
+          Meteor.call("getSong", userId, fileName, function(error, response) {
             var audioElement = document.getElementById(song._id);
             audioElement.setAttribute('src', response);
             audioElement.play();
           });
 
           event.target.classList.remove("play-song");
+          event.target.children[1].children[0].classList.remove("fa-play");
           event.target.classList.add("pause-song");
+          event.target.children[1].children[0].classList.add("fa-pause");
         }
 
       } else {
@@ -232,8 +241,10 @@ if (Meteor.isClient) {
       var audioElement = document.getElementById(song._id);
       audioElement.pause();
 
-      event.target.classList.remove("pause-song");
       event.target.classList.add("play-song");
+      event.target.children[1].children[0].classList.add("fa-play");
+      event.target.classList.remove("pause-song");
+      event.target.children[1].children[0].classList.remove("fa-pause");
     },
 
     "click .playlist":  function (event) {
@@ -301,16 +312,6 @@ if (Meteor.isClient) {
         return Playlists.findOne({_id: playlistId}).name
       } else {
         return ""
-      }
-    },
-
-    playOrPauseClass: function () {
-      var playOrPause = Session.get('playOrPauseClass');
-
-      if (playOrPause == undefined) {
-        return 'fa fa-play'
-      } else {
-        return playOrPause;
       }
     }
   });
