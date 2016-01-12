@@ -18,6 +18,8 @@
   background: #00257F !important;
   color: white !important;
   border-color: #CB9000;
+  font-family: 'Helvetica Neue', 'Lucida Grande', 'Arial';
+  font-size: 14px;
 }
 
 .list-group-item {
@@ -39,6 +41,7 @@
   height: 40px;
   line-height: 40px;
   padding: 0;
+  margin-right: 10px;
   border-radius: 50%;
   font-size: 20px;
 }
@@ -50,6 +53,7 @@
   height: 40px;
   line-height: inherit;
   padding: 0;
+  margin-right: 10px;
   border-radius: 50%;
 }
 
@@ -63,7 +67,17 @@
   height: 40px;
   line-height: 40px;
   padding: 0;
+  margin-right: 10px;
   cursor: auto;
+}
+
+.artist-song {
+  color: #777;
+  font-family: 'Helvetica Neue', 'Lucida Grande', 'Arial';
+}
+
+.playlist {
+  font-family: 'Helvetica Neue', 'Lucida Grande', 'Arial';
 }
 
 footer {
