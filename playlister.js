@@ -186,39 +186,37 @@ if (Meteor.isClient) {
       Session.set('playOrPauseClass', "fa fa-pause");
       var sessionSongId = Session.get('songId');
 
-      if (event.target.text !== undefined) {
-        var songId = event.target.text.value;
-        var song = Songs.findOne({_id: songId});
-        var userId = song.userId;
+      var songId = event.target.text.value;
+      var song = Songs.findOne({_id: songId});
+      var userId = song.userId;
 
-        if (songId == sessionSongId) {
-          var audioElement = document.getElementById(sessionSongId);
+      if (songId == sessionSongId) {
+        var audioElement = document.getElementById(sessionSongId);
+        audioElement.play();
+
+        event.target.classList.remove("play-song");
+        event.target.children[1].children[0].classList.remove("fa-play");
+        event.target.classList.add("pause-song");
+        event.target.children[1].children[0].classList.add("fa-pause");
+      } else {
+
+        Session.set('song', song.song);
+        Session.set('playlistId', song.playlistId);
+        Session.set('songArtist', song.artist);
+        Session.set('songId', song._id);
+
+        var fileName = song.file;
+
+        Meteor.call("getSong", userId, fileName, function(error, response) {
+          var audioElement = document.getElementById(song._id);
+          audioElement.setAttribute('src', response);
           audioElement.play();
+        });
 
-          event.target.classList.remove("play-song");
-          event.target.children[1].children[0].classList.remove("fa-play");
-          event.target.classList.add("pause-song");
-          event.target.children[1].children[0].classList.add("fa-pause");
-        } else {
-
-          Session.set('song', song.song);
-          Session.set('playlistId', song.playlistId);
-          Session.set('songArtist', song.artist);
-          Session.set('songId', song._id);
-
-          var fileName = song.file;
-
-          Meteor.call("getSong", userId, fileName, function(error, response) {
-            var audioElement = document.getElementById(song._id);
-            audioElement.setAttribute('src', response);
-            audioElement.play();
-          });
-
-          event.target.classList.remove("play-song");
-          event.target.children[1].children[0].classList.remove("fa-play");
-          event.target.classList.add("pause-song");
-          event.target.children[1].children[0].classList.add("fa-pause");
-        }
+        event.target.classList.remove("play-song");
+        event.target.children[1].children[0].classList.remove("fa-play");
+        event.target.classList.add("pause-song");
+        event.target.children[1].children[0].classList.add("fa-pause");
       }
     },
 
