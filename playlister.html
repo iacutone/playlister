@@ -38,7 +38,9 @@
     <nav class="navbar navbar-default">
       <div class="container-fluid">
         <div id="navbar" class="collapse navbar-collapse">
-          {{> sessionPlayer}}
+          {{#if sondIdPresence}}
+            {{> sessionPlayer}}
+          {{/if}}
         </div>
       </div>
     </nav>

@@ -303,6 +303,15 @@ if (Meteor.isClient) {
       } else {
         return false;
       }
+    },
+
+    sondIdPresence: function () {
+      var songId = Session.get('songId');
+      if (songId !== undefined) {
+        return true;
+      } else {
+        return false;
+      }
     }
   });
 
