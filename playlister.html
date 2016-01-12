@@ -91,10 +91,13 @@
               <form class="play-song">
               
                 <input type="hidden" name="text" value={{_id}} />
+
                 {{#if uploaded}}
                   <button type="submit" class='btn btn-circle'>
                     <i class="fa fa-play"></i>
                   </button>
+                {{else}}
+                  <div class='btn btn-transparent'></div>
                 {{/if}}
 
                 {{artist}}:

@@ -57,6 +57,15 @@
   padding-left: 5px;
 }
 
+.btn-transparent {
+  opacity: 0.0;
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  padding: 0;
+  cursor: auto;
+}
+
 footer {
   position: absolute;
   width: 100%;
