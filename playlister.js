@@ -200,6 +200,16 @@ if (Meteor.isClient) {
         event.target.children[1].children[0].classList.add("fa-pause");
       } else {
 
+        if (sessionSongId !== undefined) {
+          var audioElement = document.getElementById(sessionSongId);
+          audioElement.pause();
+
+          audioElement.parentElement.classList.add("play-song");
+          audioElement.parentElement.classList.remove("pause-song");
+          audioElement.parentElement.children[1].children[0].classList.add("fa-play");
+          audioElement.parentElement.children[1].children[0].classList.remove("fa-pause");
+        }
+
         Session.set('song', song.song);
         Session.set('playlistId', song.playlistId);
         Session.set('songArtist', song.artist);
