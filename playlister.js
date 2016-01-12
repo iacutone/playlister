@@ -219,14 +219,6 @@ if (Meteor.isClient) {
           event.target.classList.add("pause-song");
           event.target.children[1].children[0].classList.add("fa-pause");
         }
-
-      } else {
-
-        var audioElement = document.getElementById(sessionSongId);
-        audioElement.play();
-
-        event.target.classList.remove("play-song");
-        event.target.classList.add("pause-song");
       }
     },
 
@@ -242,8 +234,8 @@ if (Meteor.isClient) {
       audioElement.pause();
 
       event.target.classList.add("play-song");
-      event.target.children[1].children[0].classList.add("fa-play");
       event.target.classList.remove("pause-song");
+      event.target.children[1].children[0].classList.add("fa-play");
       event.target.children[1].children[0].classList.remove("fa-pause");
     },
 
@@ -252,6 +244,34 @@ if (Meteor.isClient) {
 
       Session.set('playlistId', this._id);
       Session.set('playOrPauseClass', "fa fa-play");
+    },
+
+    "click .session-song": function (event) {
+      event.preventDefault();
+
+      var sessionSongId = Session.get('songId');
+
+      if (sessionSongId !== undefined) {
+
+        var playOrPause = Session.get('playOrPauseClass');
+
+        if (playOrPause == 'fa fa-pause') {
+          Session.set('playOrPauseClass', "fa fa-play");
+          var audioElement = document.getElementById(sessionSongId);
+          audioElement.pause();
+
+          event.target.classList.add("play-song");
+          event.target.classList.remove("pause-song");
+
+        } else {
+          Session.set('playOrPauseClass', "fa fa-pause");
+          var audioElement = document.getElementById(sessionSongId);
+          audioElement.play();
+
+          event.target.classList.remove("play-song");
+          event.target.classList.add("pause-song");
+        }
+      }
     }
   });
 
