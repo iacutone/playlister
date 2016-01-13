@@ -138,6 +138,9 @@
     
     <form class="session-song">
       <span class="duration">{{songCurrentTime}}</span>
+      <svg width="100" height="200" class="circle">
+        <circle id="circle-stroke" cx="40" cy="40" r="35" stroke="#CB9000" stroke-width="3" fill="transparent" stroke-dasharray="219.91" stroke-dashoffset={{strokeDashoffset}} />
+      </svg>
       <button type="submit" class='btn btn-circle btn-blocks'>
         <i class={{playOrPauseClass}}></i>
       </button>

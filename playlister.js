@@ -421,7 +421,7 @@ if (Meteor.isClient) {
 
     songCurrentTime: function () {
       var seconds = Session.get('currentTime')
-      
+
       if (seconds !== undefined) {
         var date = new Date(null);
         date.setSeconds(seconds)
@@ -431,19 +431,22 @@ if (Meteor.isClient) {
       }
     },
 
-    durationBar: function () {
-      // var currentTime = Session.get('songDuration') || 1;
-      // var duration = Session.get('songDuration') || 1;
-      // console.log(currentTime)
-      // console.log(duration)
-      // return {
-      //   x: "" + (currentTime * 100 / duration) + "%",
-      //   y: 0,
-      //   width: 3,
-      //   height: "100%"
-      //   // "class": "cursor",
-      //   // transform: "translate(-24)"
-      // };
+    strokeDashoffset: function () {
+      var duration = Session.get('songDuration');
+      var currentTime = Session.get('currentTime');
+
+      if (duration !== undefined && currentTime !== undefined) {
+        var circleStroke = document.getElementById('circle-stroke');
+        var r = circleStroke.getAttribute("r")
+        var c = Math.PI*(r*2);
+
+        percentComplete = ((duration - currentTime) / duration) * 100
+        
+        var pct = ((100-percentComplete)/100)*c;
+        return pct;
+      } else {
+        return 0;
+      }
     }
   });
   

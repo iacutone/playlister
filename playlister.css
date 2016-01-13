@@ -83,6 +83,7 @@
 .btn-blocks {
   margin-top: 10px;
   margin-bottom: 10px;
+  margin-left: 10px;
   width: 60px;
   height: 60px;
   font-size: 30px;
@@ -92,6 +93,7 @@
   background: #00257F;
   margin-top: 10px;
   margin-bottom: 10px;
+  margin-left: 10px;
   width: 60px;
   height: 60px;
   font-size: 30px;
@@ -103,12 +105,17 @@
 }
 
 .current-time {
+  padding-left: 8px;
   color: #777;
 }
 
 .song-name {
   padding-left: 20px;
   color: #777;
+}
+
+.circle {
+  position: absolute;
 }
 
 body { 
