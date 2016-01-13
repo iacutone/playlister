@@ -201,13 +201,15 @@ if (Meteor.isClient) {
       } else {
 
         if (sessionSongId !== undefined) {
+
           var audioElement = document.getElementById(sessionSongId);
           audioElement.pause();
 
-          audioElement.parentElement.classList.add("play-song");
-          audioElement.parentElement.classList.remove("pause-song");
-          audioElement.parentElement.children[1].children[0].classList.add("fa-play");
-          audioElement.parentElement.children[1].children[0].classList.remove("fa-pause");
+          var iconTag = document.getElementsByClassName(sessionSongId)[0];
+          iconTag.classList.add("play-song");
+          iconTag.classList.remove("pause-song");
+          iconTag.classList.add("fa-play");
+          iconTag.classList.remove("fa-pause");
         }
 
         Session.set('song', song.song);
@@ -260,6 +262,12 @@ if (Meteor.isClient) {
       var sessionSongId = Session.get('songId');
 
       if (sessionSongId !== undefined) {
+
+        var iconTag = document.getElementsByClassName(sessionSongId)[0];
+        iconTag.classList.add("play-song");
+        iconTag.classList.remove("pause-song");
+        iconTag.classList.add("fa-play");
+        iconTag.classList.remove("fa-pause");
 
         var playOrPause = Session.get('playOrPauseClass');
 

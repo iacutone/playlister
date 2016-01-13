@@ -95,15 +95,14 @@
                 <input type="hidden" name="text" value={{_id}} />
 
                 {{#if uploaded}}
-                  <button type="submit" class='btn btn-circle'>
-                    <i class="fa fa-play"></i>
+                  <button type="submit" class="btn btn-circle">
+                    <i class="fa fa-play {{_id}}"></i>
                   </button>
                 {{else}}
                   <div class='btn btn-transparent'></div>
                 {{/if}}
 
                 <span class="artist-song">{{artist}}: {{song}}</span>
-                <audio id={{_id}}></audio>
               
               </form>
             </li>
@@ -139,6 +138,8 @@
     <button type="submit" class='btn btn-circle btn-blocks'>
       <i class={{playOrPauseClass}}></i>
     </button>
+
+    <audio id={{songId}}></audio>
   </form>
 
   <p class="navbar-text navbar-left">
