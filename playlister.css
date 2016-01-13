@@ -80,7 +80,37 @@
   font-family: 'Helvetica Neue', 'Lucida Grande', 'Arial';
 }
 
-footer {
-  position: absolute;
-  width: 100%;
+.btn-blocks {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  width: 60px;
+  height: 60px;
+  font-size: 30px;
+}
+
+.btn-blocks:hover {
+  background: #00257F;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  width: 60px;
+  height: 60px;
+  font-size: 30px;
+}
+
+.duration {
+  margin-right: 10px;
+  color: #777;
+}
+
+.current-time {
+  color: #777;
+}
+
+.song-name {
+  padding-left: 20px;
+  color: #777;
+}
+
+body { 
+  padding-bottom: 70px;
 }

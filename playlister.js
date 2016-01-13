@@ -264,11 +264,6 @@ if (Meteor.isClient) {
       if (sessionSongId !== undefined) {
 
         var iconTag = document.getElementsByClassName(sessionSongId)[0];
-        iconTag.classList.add("play-song");
-        iconTag.classList.remove("pause-song");
-        iconTag.classList.add("fa-play");
-        iconTag.classList.remove("fa-pause");
-
         var playOrPause = Session.get('playOrPauseClass');
 
         if (playOrPause == 'fa fa-pause') {
@@ -279,6 +274,10 @@ if (Meteor.isClient) {
           event.target.classList.add("play-song");
           event.target.classList.remove("pause-song");
 
+          iconTag.classList.add("play-song");
+          iconTag.classList.remove("pause-song");
+          iconTag.classList.add("fa-play");
+          iconTag.classList.remove("fa-pause");
         } else {
           Session.set('playOrPauseClass', "fa fa-pause");
           var audioElement = document.getElementById(sessionSongId);
@@ -286,6 +285,11 @@ if (Meteor.isClient) {
 
           event.target.classList.remove("play-song");
           event.target.classList.add("pause-song");
+
+          iconTag.classList.remove("play-song");
+          iconTag.classList.add("pause-song");
+          iconTag.classList.remove("fa-play");
+          iconTag.classList.add("fa-pause");
         }
       }
     }
@@ -376,6 +380,10 @@ if (Meteor.isClient) {
   });
 
   Template.sessionPlayer.helpers({
+    songId: function() {
+      return Session.get('songId');
+    },
+
     formattedSong: function () {
       var name = Session.get('song');
       var artist = Session.get('songArtist');
@@ -389,11 +397,84 @@ if (Meteor.isClient) {
 
     playOrPauseClass: function () {
       var playOrPause = Session.get('playOrPauseClass');
+      var songId = Session.get('songId');
+
 
       if (playOrPause == undefined) {
         return 'fa fa-play'
       } else {
         return playOrPause;
+      }
+    },
+
+    songDuration: function () {
+      var sessionSongId = Session.get('songId');
+
+      if (sessionSongId !== undefined) {
+        return (Math.round(Session.get('songDuration')) / 60).toFixed(2)
+      }
+    },
+
+    songCurrentTime: function () {
+      var sessionSongId = Session.get('songId');
+
+      if (sessionSongId !== undefined) {
+        return (Math.round(Session.get('currentTime') * 100) / 60).toFixed(1)
+      }
+    },
+
+    durationBar: function () {
+      // var currentTime = Session.get('songDuration') || 1;
+      // var duration = Session.get('songDuration') || 1;
+      // console.log(currentTime)
+      // console.log(duration)
+      // return {
+      //   x: "" + (currentTime * 100 / duration) + "%",
+      //   y: 0,
+      //   width: 3,
+      //   height: "100%"
+      //   // "class": "cursor",
+      //   // transform: "translate(-24)"
+      // };
+    }
+  });
+  
+  Template.sessionPlayer.events({
+    "durationchange audio": function (event, template) {
+      Session.set('songDuration', event.target.duration);
+    },
+
+    "play audio": function(event) {
+      setInterval(function() {
+        Session.set('currentTime', event.target.currentTime);
+      }, 25)
+    },
+
+    "ended audio": function () {
+      var playlistId = Session.get('playlistId')
+      var songId = Session.get('songId')
+
+      // find the next song to play
+
+      var song = Songs.findOne({_id: songId})
+      var order = song.order
+
+      var songs = Songs.find({playlistId: playlistId, uploaded: true}).fetch()
+      var songsIdArray = []
+
+      for (i = 0, len = songs.length; i < len; i++) {
+        if (songs[i].order > order) {
+          songsIdArray.push(songs[i]._id)
+        }
+      }
+
+      // play the next song
+
+      if (songOrderArray > 0) {
+        var songId = Songs.findOne({_id: songsIdArray[0]})._id
+
+        var audioElement = document.getElementById(songId);
+        audioElement.play();
       }
     }
   });

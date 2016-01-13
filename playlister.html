@@ -35,7 +35,7 @@
   </div>
 
   <footer>
-    <nav class="navbar navbar-default">
+    <nav class="navbar navbar-default navbar-fixed-bottom">
       <div class="container-fluid">
         <div id="navbar" class="collapse navbar-collapse">
           {{#if sondIdPresence}}
@@ -134,15 +134,19 @@
 </template>
 
 <template name="sessionPlayer">
-  <form class="navbar-form navbar-left session-song">
-    <button type="submit" class='btn btn-circle btn-blocks'>
-      <i class={{playOrPauseClass}}></i>
-    </button>
+  <div class="container text-center">
+    
+    <form class="session-song">
+      <span class="duration">{{songCurrentTime}}</span>
+      <button type="submit" class='btn btn-circle btn-blocks'>
+        <i class={{playOrPauseClass}}></i>
+      </button>
+      <span class="current-time">{{songDuration}}</span>
+      <audio id={{songId}}></audio>
 
-    <audio id={{songId}}></audio>
-  </form>
-
-  <p class="navbar-text navbar-left">
-    {{formattedSong}}
-  </p>
+      <span class="song-name">
+        {{formattedSong}}
+      </span>
+    </form>
+  </div>
 </template>
