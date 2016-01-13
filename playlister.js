@@ -484,7 +484,7 @@ if (Meteor.isClient) {
 
       // play the next song
 
-      if (songOrderArray > 0) {
+      if (songsIdArray > 0) {
         var songId = Songs.findOne({_id: songsIdArray[0]})._id
 
         var audioElement = document.getElementById(songId);
