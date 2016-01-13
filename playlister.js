@@ -408,18 +408,26 @@ if (Meteor.isClient) {
     },
 
     songDuration: function () {
-      var sessionSongId = Session.get('songId');
+      var seconds = Session.get('songDuration');
 
-      if (sessionSongId !== undefined) {
-        return (Math.round(Session.get('songDuration')) / 60).toFixed(2)
+      if (seconds !== undefined) {
+        var date = new Date(null);
+        date.setSeconds(seconds)
+        return date.toISOString().substr(14, 5);
+      } else {
+        return ''
       }
     },
 
     songCurrentTime: function () {
-      var sessionSongId = Session.get('songId');
-
-      if (sessionSongId !== undefined) {
-        return (Math.round(Session.get('currentTime') * 100) / 60).toFixed(1)
+      var seconds = Session.get('currentTime')
+      
+      if (seconds !== undefined) {
+        var date = new Date(null);
+        date.setSeconds(seconds)
+        return date.toISOString().substr(14, 5);
+      } else {
+        return ''
       }
     },
 
