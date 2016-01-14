@@ -487,13 +487,23 @@ if (Meteor.isClient) {
 
       // play the next song
 
-      if (songsIdArray > 0) {
-        var songId = Songs.findOne({_id: songsIdArray[0]})._id
+      if (songsIdArray.length > 0) {
+        var song = Songs.findOne({_id: songsIdArray[0]})
+        Session.set('song', song.song);
+        Session.set('playlistId', song.playlistId);
+        Session.set('songArtist', song.artist);
+        Session.set('songId', song._id);
 
-        var audioElement = document.getElementById(songId);
-        audioElement.play();
+        var fileName = song.file;
+        var userId = song.userId;
 
-        var iconTag = document.getElementsByClassName(songId)[0];
+        Meteor.call("getSong", userId, fileName, function(error, response) {
+          var audioElement = document.getElementById(song._id);
+          audioElement.setAttribute('src', response);
+          audioElement.play();
+        });
+
+        var iconTag = document.getElementsByClassName(song._id)[0];
         iconTag.classList.remove("play-song");
         iconTag.classList.add("pause-song");
         iconTag.classList.remove("fa-play");
