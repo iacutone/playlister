@@ -22,7 +22,7 @@ if (Meteor.isServer) {
       
       var searchString = `${userId + " " + artist + " " + song}`
 
-      exec("~/code/fun/playlister/youtube.sh " + searchString, function(error, stdout, stderr) {
+      exec("~/code/fun/playlister/youtube.sh ", "~/code/fun/playlister/" + searchString, function(error, stdout, stderr) {
         console.log('stdout: ' + stdout);
         console.log('stderr: ' + stderr);
         if (error) {
