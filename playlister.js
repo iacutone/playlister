@@ -22,7 +22,7 @@ if (Meteor.isServer) {
       
       var searchString = `${userId + " " + artist + " " + song}`
 
-      exec("/Users/iacutone/code/fun/playlister/youtube.sh " + searchString, function(error, stdout, stderr) {
+      exec("~/code/fun/playlister/youtube.sh " + searchString, function(error, stdout, stderr) {
         console.log('stdout: ' + stdout);
         console.log('stderr: ' + stderr);
         if (error) {
@@ -42,7 +42,7 @@ if (Meteor.isServer) {
 
       var searchString = `${userId + " " + directory + " " + file}`
 
-      exec("/Users/iacutone/code/fun/playlister/s3.sh " + searchString, function(error, stdout, stderr) {
+      exec("~/code/fun/playlister/s3.sh " + searchString, function(error, stdout, stderr) {
         console.log('stdout: ' + stdout);
         console.log('stderr: ' + stderr);
         if (error) {

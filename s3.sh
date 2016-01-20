@@ -20,6 +20,6 @@ curl -X PUT -T "/$directory" \
   -H "Authorization: AWS ${S3KEY}:$signature" \
   "https://$bucket.s3.amazonaws.com/$user_id/$file"
 
-echo "s3 upload complete"
+echo "s3 complete"
 echo $directory
 rm -rf "/${directory:?}"

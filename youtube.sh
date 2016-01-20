@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Script started"
+echo "youtube-dl script started"
 
 user_id=$1
 shift
@@ -10,6 +10,6 @@ youtube-dl --default-search=ytsearch: \
            --format=bestaudio \
            --audio-format=mp3 \
            --audio-quality=1 "$*" \
-           --output="/Users/iacutone/code/fun/playlister/tmp/$user_id/%(title)s.%(ext)s"
+           --output="~/code/fun/playlister/tmp/$user_id/%(title)s.%(ext)s"
 
-echo "youtube-dl finished"
+echo "youtube-dl complete"
